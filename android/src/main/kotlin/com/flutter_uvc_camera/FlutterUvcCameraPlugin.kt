@@ -41,14 +41,19 @@ class FlutterUvcCameraPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         channel.setMethodCallHandler(this)
         context = binding.applicationContext
         usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-        usbMonitor = USBMonitor(context, usbDeviceConnectListener)
-        usbMonitor?.register()
         Log.d(TAG, "Plugin attached to engine")
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "initialize" -> {
+                // Lazy initialization of USBMonitor
+                if (usbMonitor == null) {
+                    Log.d(TAG, "Initializing USBMonitor")
+                    usbMonitor = USBMonitor(context, usbDeviceConnectListener)
+                    usbMonitor?.register()
+                }
+                
                 val hasCamera = findUvcCamera() != null
                 Log.d(TAG, "Initialize: UVC camera ${if (hasCamera) "found" else "not found"}")
                 result.success(hasCamera)
@@ -245,6 +250,19 @@ class FlutterUvcCameraPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         uvcCamera = null
         isStreaming = false
     }
+    
+    private fun cleanupResources() {
+        Log.d(TAG, "Cleaning up resources")
+        stopInternal()
+        try {
+            usbMonitor?.unregister()
+            usbMonitor?.destroy()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error during cleanup: ${e.message}")
+        }
+        usbMonitor = null
+        pendingStartResult = null
+    }
 
     private fun sendFrameToFlutter(data: ByteArray, width: Int, height: Int) {
         Handler(Looper.getMainLooper()).post {
@@ -262,11 +280,7 @@ class FlutterUvcCameraPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
-        try {
-            usbMonitor?.unregister()
-        } catch (_: Exception) { }
-        stopInternal()
-        usbMonitor = null
+        cleanupResources()
         Log.d(TAG, "Plugin detached from engine")
     }
 }

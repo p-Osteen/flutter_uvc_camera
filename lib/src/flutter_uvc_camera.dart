@@ -14,6 +14,11 @@ class FlutterUvcCamera {
   /// Returns true if UVC cameras are available
   static Future<bool> initialize() async {
     try {
+      // Clean up any existing state from hot restart
+      if (_isInitialized) {
+        await dispose();
+      }
+      
       final result = await _channel.invokeMethod<bool>('initialize');
       _isInitialized = result ?? false;
       return _isInitialized;
@@ -68,8 +73,14 @@ class FlutterUvcCamera {
   /// 
   /// Returns [Stream<CameraFrame>] that emits frames as they arrive
   static Stream<CameraFrame> getFrameStream() {
+    // Close existing controller on hot restart
+    if (_frameController != null && _frameController!.isClosed) {
+      _frameController = null;
+    }
+    
     _frameController ??= StreamController<CameraFrame>.broadcast(
       onListen: () {
+        print('FlutterUvcCamera: Frame stream listener attached');
         _channel.setMethodCallHandler((call) async {
           if (call.method == 'onFrameAvailable') {
             try {
@@ -89,6 +100,7 @@ class FlutterUvcCamera {
         });
       },
       onCancel: () {
+        print('FlutterUvcCamera: Frame stream listener cancelled');
         stopPreview();
       },
     );
