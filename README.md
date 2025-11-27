@@ -54,31 +54,6 @@ chmod +x build_native.sh
     <uses-permission android:name="android.permission.USB_PERMISSION" />
 </manifest>
 ```
-
-## 💻 Usage
-
-### Basic Example
-
-```dart
-// shortened for brevity
-```
-
-### ML Kit Integration
-
-```dart
-// shortened for brevity
-```
-
-## 📘 API Reference
-
-// shortened for brevity
-
-## 🏗️ Architecture
-
-```
-[diagram omitted for md]
-```
-
 ## 🔧 Troubleshooting
 
 // shortened for brevity
