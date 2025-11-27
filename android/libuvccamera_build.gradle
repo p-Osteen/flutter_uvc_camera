@@ -1,0 +1,28 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdk 34
+    namespace 'com.serenegiant.usb'
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 34
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/libs']
+            jni.srcDirs = []  // Disable automatic ndk-build
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.annotation:annotation:1.7.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
