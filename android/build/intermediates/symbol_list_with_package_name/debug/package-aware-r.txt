@@ -1,1 +1,0 @@
-com.athermind.flutter_uvc_camera

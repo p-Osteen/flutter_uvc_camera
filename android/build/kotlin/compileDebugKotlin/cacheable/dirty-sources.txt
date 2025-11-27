@@ -1,1 +1,0 @@
-D:\Diode\packages\flutter_uvc_camera\android\src\main\kotlin\com\athermind\flutter_uvc_camera\FlutterUvcCameraPlugin.kt

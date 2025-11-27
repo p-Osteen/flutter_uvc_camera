@@ -1,7 +1,0 @@
-com.flutter_uvc_camera-pngs-0 D:\Diode\packages\flutter_uvc_camera\android\build\generated\res\pngs\release
-com.flutter_uvc_camera-resValues-1 D:\Diode\packages\flutter_uvc_camera\android\build\generated\res\resValues\release
-com.flutter_uvc_camera-mergeReleaseResources-2 D:\Diode\packages\flutter_uvc_camera\android\build\intermediates\incremental\release\mergeReleaseResources\merged.dir
-com.flutter_uvc_camera-mergeReleaseResources-3 D:\Diode\packages\flutter_uvc_camera\android\build\intermediates\incremental\release\mergeReleaseResources\stripped.dir
-com.flutter_uvc_camera-release-4 D:\Diode\packages\flutter_uvc_camera\android\build\intermediates\merged_res\release\mergeReleaseResources
-com.flutter_uvc_camera-main-5 D:\Diode\packages\flutter_uvc_camera\android\src\main\res
-com.flutter_uvc_camera-release-6 D:\Diode\packages\flutter_uvc_camera\android\src\release\res
