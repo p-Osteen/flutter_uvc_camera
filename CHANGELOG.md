@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Added
 - Native library integration (libuvccamera, libuvc, libusb, libjpeg-turbo)
-- NDK build system with automated scripts (`build_native.bat`, `build_native.sh`)
+- NDK build system with automated scripts (build_native.bat, build_native.sh)
 - ARM architecture support (armeabi-v7a, arm64-v8a)
 - Complete UVCCamera Kotlin integration with frame streaming
 - USB device detection and permission handling
