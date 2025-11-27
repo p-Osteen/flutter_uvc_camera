@@ -47,13 +47,7 @@ class FlutterUvcCameraPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "initialize" -> {
-                // Lazy initialization of USBMonitor
-                if (usbMonitor == null) {
-                    Log.d(TAG, "Initializing USBMonitor")
-                    usbMonitor = USBMonitor(context, usbDeviceConnectListener)
-                    usbMonitor?.register()
-                }
-                
+                // Just check for camera presence without requesting permissions
                 val hasCamera = findUvcCamera() != null
                 Log.d(TAG, "Initialize: UVC camera ${if (hasCamera) "found" else "not found"}")
                 result.success(hasCamera)
@@ -196,6 +190,24 @@ class FlutterUvcCameraPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             result.success(false)
             return
         }
+        
+        // Initialize USBMonitor when actually starting preview
+        if (usbMonitor == null) {
+            Log.d(TAG, "Initializing USBMonitor for preview")
+            try {
+                usbMonitor = USBMonitor(context, usbDeviceConnectListener)
+                usbMonitor?.register()
+            } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException during USBMonitor initialization", e)
+                result.error("PERMISSION_ERROR", "USB permission error: ${e.message}", null)
+                return
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception during USBMonitor initialization", e)
+                result.error("INIT_ERROR", "Failed to initialize USB: ${e.message}", null)
+                return
+            }
+        }
+        
         val device = findUvcCamera()
         if (device == null) {
             result.error("NO_CAMERA", "No UVC camera found", null)

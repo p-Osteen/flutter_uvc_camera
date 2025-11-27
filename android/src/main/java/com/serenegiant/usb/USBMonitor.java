@@ -660,12 +660,25 @@ public final class USBMonitor {
 		if (useNewAPI && BuildCheck.isAndroid5()) {
 			sb.append("#");
 			if (TextUtils.isEmpty(serial)) {
-				sb.append(device.getSerialNumber());	sb.append("#");	// API >= 21
+				try {
+					sb.append(device.getSerialNumber());	sb.append("#");	// API >= 21
+				} catch (SecurityException e) {
+					// Permission not granted for this device, skip serial
+					sb.append("NO_PERMISSION");	sb.append("#");
+				}
 			}
-			sb.append(device.getManufacturerName());	sb.append("#");	// API >= 21
+			try {
+				sb.append(device.getManufacturerName());	sb.append("#");	// API >= 21
+			} catch (SecurityException e) {
+				sb.append("UNKNOWN");	sb.append("#");
+			}
 			sb.append(device.getConfigurationCount());	sb.append("#");	// API >= 21
 			if (BuildCheck.isMarshmallow()) {
-				sb.append(device.getVersion());			sb.append("#");	// API >= 23
+				try {
+					sb.append(device.getVersion());			sb.append("#");	// API >= 23
+				} catch (SecurityException e) {
+					sb.append("0");			sb.append("#");
+				}
 			}
 		}
 //		if (DEBUG) Log.v(TAG, "getDeviceKeyName:" + sb.toString());
