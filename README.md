@@ -1,21 +1,27 @@
-# flutter_uvc_camera
+﻿# flutter_uvc_camera
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-02569B?logo=flutter)](https://flutter.dev)
+[![Android](https://img.shields.io/badge/Android-5.0%2B-3DDC84?logo=android)](https://developer.android.com)
+[![NDK](https://img.shields.io/badge/NDK-27.1%2B-blue)](https://developer.android.com/ndk)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 Flutter plugin for USB Video Class (UVC) camera support on Android using native libuvccamera.
 
-## Features
+## âœ¨ Features
 
-- Real-time USB camera streaming with NV21 format (ML Kit compatible)
-- Native performance via libuvccamera (C/C++/JNI)
-- Automatic resolution detection
-- Android 5.0+ (API 21+), ARM architectures only
+- âš¡ Real-time USB camera streaming with NV21 format (ML Kit compatible)
+- ðŸš€ Native performance via libuvccamera (C/C++/JNI)
+- ðŸ“± Automatic resolution detection
+- ðŸŽ¯ Android 5.0+ (API 21+), ARM architectures only
 
-## Requirements
+## ðŸ“‹ Requirements
 
 - Android device with USB OTG support
 - UVC-compatible USB camera
-- Flutter 3.0+, Android NDK 27.1+
+- Flutter 3.0+
+- Android NDK 27.1+
 
-## 🚀 Installation
+## ðŸš€ Installation
 
 ### 1. Add Dependency
 
@@ -31,40 +37,32 @@ dependencies:
 
 The plugin requires native UVC libraries to be built before use:
 
-#### Windows
-
+**Windows:**
 ```powershell
 cd android
 .\build_native.bat
+```
 
+**macOS/Linux:**
 ```bash
 cd android
 chmod +x build_native.sh
 ./build_native.sh
 ```
 
-**First time?** See [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md) for complete NDK setup guide.
+> **ðŸ’¡ First time?** See [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md) for complete NDK setup guide.
 
 **Build Output:**
 - `android/UVCCamera/libuvccamera/src/main/libs/armeabi-v7a/*.so`
 - `android/UVCCamera/libuvccamera/src/main/libs/arm64-v8a/*.so`
 
-Libraries built:
+**Libraries built:**
 - `libUVCCamera.so` - Main UVC camera library
 - `libuvc.so` - UVC protocol implementation
 - `libusb100.so` - USB communication layer
 - `libjpeg-turbo1500.so` - JPEG compression
 
-### 3. Complete Kotlin Integration
-
-Follow [INTEGRATION.md](INTEGRATION.md) for step-by-step Kotlin integration:
-
-1. Add UVCCamera imports to `FlutterUvcCameraPlugin.kt`
-2. Initialize USBMonitor and handle USB permissions
-3. Implement frame callbacks for real-time streaming
-4. Convert YUYV frames to NV21 format
-
-### 4. Add USB Permissions
+### 3. Add USB Permissions
 
 Add to `android/src/main/AndroidManifest.xml`:
 
@@ -75,7 +73,8 @@ Add to `android/src/main/AndroidManifest.xml`:
 </manifest>
 ```
 
-## 💻 Usage
+
+## ðŸ’» Usage
 
 ### Basic Example
 
@@ -158,9 +157,14 @@ class _UvcCameraWidgetState extends State<UvcCameraWidget> {
 ### Advanced: ML Kit Integration
 
 ```dart
-import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 
-final barcodeScanner = BarcodeScanner();
+final faceDetector = FaceDetector(
+  options: FaceDetectorOptions(
+    enableLandmarks: true,
+    enableClassification: true,
+  ),
+);
 
 FlutterUvcCamera.getFrameStream().listen((frame) async {
   // frame.bytes is already in NV21 format - perfect for ML Kit!
@@ -174,14 +178,15 @@ FlutterUvcCamera.getFrameStream().listen((frame) async {
     ),
   );
 
-  final barcodes = await barcodeScanner.processImage(inputImage);
-  for (final barcode in barcodes) {
-    print('Barcode detected: ${barcode.rawValue}');
+  final faces = await faceDetector.processImage(inputImage);
+  for (final face in faces) {
+    print('Face detected at: ${face.boundingBox}');
   }
 });
 ```
 
-## 📖 API Reference
+
+## ðŸ“– API Reference
 
 ### FlutterUvcCamera
 
@@ -189,34 +194,50 @@ Main class for UVC camera operations.
 
 #### Methods
 
-##### `initialize() → Future<bool>`
+##### `initialize() â†’ Future<bool>`
 
 Initializes the plugin and checks for connected UVC cameras.
 
-- **Returns**: `true` if a UVC camera is detected, `false` otherwise
-- **Throws**: `PlatformException` on initialization errors
+- **Returns:** `true` if a UVC camera is detected, `false` otherwise
+- **Throws:** `PlatformException` on initialization errors
 
-##### `startPreview() → Future<void>`
+##### `getAvailableCameras() â†’ Future<List<UvcCameraInfo>>`
+
+Gets list of available UVC cameras.
+
+- **Returns:** List of camera information objects
+- **Properties:** `deviceName`, `vendorId`, `productId`, `devicePath`
+
+##### `startPreview() â†’ Future<bool>`
 
 Starts camera preview and frame streaming.
 
-- **Behavior**: Automatically uses camera's native resolution
-- **Requires**: USB permissions granted by user
-- **Throws**: `PlatformException` if camera not available or permissions denied
+- **Returns:** `true` if started successfully
+- **Behavior:** Automatically uses camera's native resolution (640x480)
+- **Requires:** USB permissions granted by user
+- **Throws:** `PlatformException` if camera not available or permissions denied
 
-##### `stopPreview() → Future<void>`
+##### `stopPreview() â†’ Future<void>`
 
 Stops camera preview and frame streaming.
 
-- **Behavior**: Cleans up camera resources and stops frame callbacks
+- **Behavior:** Cleans up camera resources and stops frame callbacks
 
-##### `getFrameStream() → Stream<CameraFrame>`
+##### `getFrameStream() â†’ Stream<CameraFrame>`
 
 Returns a stream of camera frames.
 
-- **Returns**: Stream emitting `CameraFrame` objects
-- **Format**: Frames are in NV21 format
-- **Rate**: Depends on camera capabilities (typically 15-30 fps)
+- **Returns:** Stream emitting `CameraFrame` objects
+- **Format:** Frames are in NV21 format
+- **Rate:** Depends on camera capabilities (typically 15-30 fps)
+
+##### `dispose() â†’ Future<void>`
+
+Cleans up plugin resources.
+
+- **Behavior:** Stops preview and releases USB connections
+
+---
 
 ### CameraFrame
 
@@ -224,108 +245,147 @@ Represents a single camera frame.
 
 #### Properties
 
-- `width` (int) - Frame width in pixels
-- `height` (int) - Frame height in pixels
-- `bytes` (Uint8List) - Frame data in NV21 format
-- `format` (String) - Always "NV21" for this plugin
+| Property | Type | Description |
+|----------|------|-------------|
+| `width` | `int` | Frame width in pixels |
+| `height` | `int` | Frame height in pixels |
+| `bytes` | `Uint8List` | Frame data in NV21 format |
+| `format` | `String` | Always "NV21" for this plugin |
+| `timestamp` | `int` | Frame timestamp in milliseconds |
 
 #### NV21 Format Details
 
 NV21 (YUV 420 semi-planar) format structure:
-- Y plane: `width * height` bytes (grayscale)
-- UV plane: `width * height / 2` bytes (interleaved V and U)
-- Total size: `width * height * 3 / 2` bytes
+- **Y plane:** `width * height` bytes (grayscale)
+- **UV plane:** `width * height / 2` bytes (interleaved V and U)
+- **Total size:** `width * height * 3 / 2` bytes
 
-## 🏗️ Architecture
+---
+
+### UvcCameraInfo
+
+Camera device information.
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `deviceName` | `String` | Human-readable camera name |
+| `vendorId` | `int` | USB vendor ID |
+| `productId` | `int` | USB product ID |
+| `devicePath` | `String` | System device path |
+
+## ðŸ—ï¸ Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   Flutter App                        │
-│              (Dart - lib/main.dart)                  │
-└─────────────────┬───────────────────────────────────┘
-                  │ MethodChannel / EventChannel
-                  │
-┌─────────────────▼───────────────────────────────────┐
-│              Kotlin Plugin Layer                     │
-│       (FlutterUvcCameraPlugin.kt)                    │
-│  • USB device detection                              │
-│  • Permission handling                               │
-│  • Frame callback bridge                             │
-└─────────────────┬───────────────────────────────────┘
-                  │ JNI calls
-                  │
-┌─────────────────▼───────────────────────────────────┐
-│         UVCCamera Java Library                       │
-│     (com.serenegiant.usb.*)                          │
-│  • USBMonitor - Device management                    │
-│  • UVCCamera - Camera control                        │
-│  • IFrameCallback - Frame delivery                   │
-└─────────────────┬───────────────────────────────────┘
-                  │ JNI bridge
-                  │
-┌─────────────────▼───────────────────────────────────┐
-│          Native Libraries (C/C++)                    │
-│  • libUVCCamera.so - JNI bridge                      │
-│  • libuvc.so - UVC protocol                          │
-│  • libusb100.so - USB communication                  │
-│  • libjpeg-turbo1500.so - JPEG codec                 │
-└─────────────────┬───────────────────────────────────┘
-                  │ USB protocol
-                  │
-┌─────────────────▼───────────────────────────────────┐
-│              USB Camera Device                       │
-│         (UVC-compatible webcam)                      │
-└──────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                   Flutter App                        â”‚
+â”‚              (Dart - lib/main.dart)                  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                  â”‚ MethodChannel / EventChannel
+                  â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚              Kotlin Plugin Layer                     â”‚
+â”‚       (FlutterUvcCameraPlugin.kt)                    â”‚
+â”‚  â€¢ USB device detection                              â”‚
+â”‚  â€¢ Permission handling                               â”‚
+â”‚  â€¢ Frame callback bridge                             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                  â”‚ JNI calls
+                  â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚         UVCCamera Java Library                       â”‚
+â”‚     (com.serenegiant.usb.*)                          â”‚
+â”‚  â€¢ USBMonitor - Device management                    â”‚
+â”‚  â€¢ UVCCamera - Camera control                        â”‚
+â”‚  â€¢ IFrameCallback - Frame delivery                   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                  â”‚ JNI bridge
+                  â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚          Native Libraries (C/C++)                    â”‚
+â”‚  â€¢ libUVCCamera.so - JNI bridge                      â”‚
+â”‚  â€¢ libuvc.so - UVC protocol                          â”‚
+â”‚  â€¢ libusb100.so - USB communication                  â”‚
+â”‚  â€¢ libjpeg-turbo1500.so - JPEG codec                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                  â”‚ USB protocol
+                  â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚              USB Camera Device                       â”‚
+â”‚         (UVC-compatible webcam)                      â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-## 🔧 Troubleshooting
+
+## ðŸ”§ Troubleshooting
 
 ### Build Issues
 
-**Problem**: "FLUTTER_ROOT is null"
-- **Solution**: Don't build plugin standalone. Build as part of Flutter app: `cd example && flutter build apk`
+#### "FLUTTER_ROOT is null"
 
-**Problem**: "ndk-build: command not found"
-- **Solution**: Install NDK via Android Studio SDK Manager, then set `ndk.dir` in `android/local.properties`
+**Solution:** Don't build plugin standalone. Build as part of Flutter app:
+```bash
+cd example && flutter build apk
+```
 
-**Problem**: x86 architecture linking errors
-- **Solution**: Already fixed - plugin only builds ARM architectures (covers 99% of devices)
+#### "ndk-build: command not found"
+
+**Solution:** Install NDK via Android Studio SDK Manager, then set `ndk.dir` in `android/local.properties`:
+```properties
+ndk.dir=C:\\Users\\YourName\\AppData\\Local\\Android\\Sdk\\ndk\\27.1.12297006
+```
+
+#### x86 architecture linking errors
+
+**Solution:** Already fixed - plugin only builds ARM architectures (covers 99% of devices)
+
+---
 
 ### Runtime Issues
 
-**Problem**: "No UVC camera detected"
-- Check USB OTG cable is properly connected
-- Verify camera is UVC-compatible (most webcams are)
-- Try unplugging and replugging camera
-- Check Android device supports USB OTG
+#### "No UVC camera detected"
 
-**Problem**: "USB permission denied"
-- Ensure USB permission request is shown to user
-- Check AndroidManifest.xml has USB permissions
-- Try restarting app after granting permission
+**Checklist:**
+- âœ… USB OTG cable is properly connected
+- âœ… Camera is UVC-compatible (most webcams are)
+- âœ… Try unplugging and replugging camera
+- âœ… Android device supports USB OTG
 
-**Problem**: "No frames received"
-- Verify native libraries are built (`ls android/UVCCamera/libuvccamera/src/main/libs/`)
-- Check Kotlin integration is complete (see INTEGRATION.md)
-- Ensure `implementation project(':libuvccamera')` is uncommented in build.gradle
-- Check logcat for native errors: `adb logcat | grep UVC`
+#### "USB permission denied"
+
+**Checklist:**
+- âœ… USB permission request is shown to user
+- âœ… `AndroidManifest.xml` has USB permissions
+- âœ… Try restarting app after granting permission
+
+#### "No frames received"
+
+**Checklist:**
+- âœ… Native libraries are built (`ls android/UVCCamera/libuvccamera/src/main/libs/`)
+- âœ… SurfaceTexture is initialized in plugin
+- âœ… Check logcat: `adb logcat | grep FlutterUvcCamera`
+
+---
 
 ### Performance Issues
 
-**Problem**: Low frame rate or dropped frames
-- Check device CPU usage
-- Consider reducing frame processing complexity
+#### Low frame rate or dropped frames
+
+**Solutions:**
+- Reduce frame processing complexity
 - Use native format (NV21) without conversion
 - Process frames on background isolate
+- Check device CPU usage
 
-## 📚 Additional Documentation
+## ðŸ“š Additional Documentation
 
 - **[BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md)** - Complete NDK setup and native library build guide
 - **[INTEGRATION.md](INTEGRATION.md)** - Step-by-step Kotlin integration with code examples
 - **[BUILD_SUCCESS.md](BUILD_SUCCESS.md)** - Build verification and next steps
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
 
-## 🧪 Testing
+## ðŸ§ª Testing
 
 ### Test with Example App
 
@@ -340,7 +400,7 @@ flutter pub get
 flutter run
 ```
 
-## 📄 License
+## ðŸ“„ License
 
 This plugin is licensed under [LICENSE](LICENSE).
 
@@ -351,21 +411,21 @@ This plugin is licensed under [LICENSE](LICENSE).
 - **libusb** - LGPL 2.1
 - **libjpeg-turbo** - Modified BSD License
 
-## 🙏 Acknowledgments
+## ðŸ™ Acknowledgments
 
 - [saki4510t/UVCCamera](https://github.com/saki4510t/UVCCamera) - Excellent UVC library for Android
 - libusb and libuvc projects for USB communication
 - libjpeg-turbo for high-performance JPEG processing
 
-## 📞 Support
+## ðŸ“ž Support
 
 For issues, questions, or feature requests, please use the GitHub issue tracker.
 
 
-**Status**: ✅ Native libraries built | ⚠️ Kotlin integration required | 🚀 Ready for testing
-✅ libuvccamera source code included
-⚠️ Native library build required (NDK)
-⚠️ UVCCamera integration code documented but commented out
+**Status**: âœ… Native libraries built | âš ï¸ Kotlin integration required | ðŸš€ Ready for testing
+âœ… libuvccamera source code included
+âš ï¸ Native library build required (NDK)
+âš ï¸ UVCCamera integration code documented but commented out
 
 ### Next Steps
 
@@ -383,6 +443,8 @@ For issues, questions, or feature requests, please use the GitHub issue tracker.
 
 - Will use camera's native resolution automatically (once integrated)
 - Output format will be NV21 (ML Kit compatible)
-#   f l u t t e r _ u v c _ c a m e r a  
- #   f l u t t e r _ u v c _ c a m e r a  
+#   f l u t t e r _ u v c _ c a m e r a 
+ 
+ #   f l u t t e r _ u v c _ c a m e r a 
+ 
  
