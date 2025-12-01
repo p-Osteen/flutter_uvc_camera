@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🐛 Fixed
+- USB permission request not working reliably on Android 12+ (API 31+)
+  - Added FLAG_MUTABLE to PendingIntent for USB permission dialog
+  - Added BuildCheck.isAPI31() helper method for Android 12+ detection
+  - Fixes intermittent permission dialog not appearing issue
+
 ## [0.2.0] - 2025-11-27
 
 ### ✨ Added
