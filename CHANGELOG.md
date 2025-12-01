@@ -8,10 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 🐛 Fixed
-- USB permission request not working reliably on Android 12+ (API 31+)
-  - Added FLAG_MUTABLE to PendingIntent for USB permission dialog
-  - Added BuildCheck.isAPI31() helper method for Android 12+ detection
-  - Fixes intermittent permission dialog not appearing issue
+- USB permission request not working reliably on Android 6.0+ (API 23+)
+  - Added FLAG_UPDATE_CURRENT to PendingIntent on Android 6.0-11 for better reliability
+  - Added FLAG_MUTABLE to PendingIntent on Android 12+ (required by system)
+  - Improved support for Android TV devices (tested on Android TV OS 11)
+  - Added comprehensive logging to debug permission request issues
+  - Added null check for mPermissionIntent to prevent silent failures
+  - Added BuildCheck.isAPI23() helper method for Android 6.0+ detection
 
 ## [0.2.0] - 2025-11-27
 

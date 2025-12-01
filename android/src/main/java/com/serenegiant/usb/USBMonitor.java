@@ -167,16 +167,24 @@ public final class USBMonitor {
 			if (DEBUG) Log.i(TAG, "register:");
 			final Context context = mWeakContext.get();
 			if (context != null) {
-				// Android 12+ requires FLAG_IMMUTABLE or FLAG_MUTABLE
+				// Android 12+ (API 31+) requires FLAG_IMMUTABLE or FLAG_MUTABLE
+				// For USB permission requests, we need FLAG_MUTABLE as the system modifies the intent
+				// Using FLAG_MUTABLE on API 23+ for better reliability on all modern Android versions
 				int flags = 0;
 				if (BuildCheck.isAPI31()) {
+					// Required on Android 12+
 					flags = PendingIntent.FLAG_MUTABLE;
+				} else if (BuildCheck.isAPI23()) {
+					// Recommended on Android 6.0+ for better reliability
+					flags = PendingIntent.FLAG_UPDATE_CURRENT;
 				}
+				Log.i(TAG, "Creating PendingIntent with flags: " + flags + " (API " + android.os.Build.VERSION.SDK_INT + ")");
 				mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), flags);
 				final IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 				// ACTION_USB_DEVICE_ATTACHED never comes on some devices so it should not be added here
 				filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
 				context.registerReceiver(mUsbReceiver, filter);
+				Log.i(TAG, "USB broadcast receiver registered successfully");
 			}
 			// start connection check
 			mDeviceCounts = 0;
@@ -420,29 +428,40 @@ public final class USBMonitor {
 	 * @return true if fail to request permission
 	 */
 	public synchronized boolean requestPermission(final UsbDevice device) {
-//		if (DEBUG) Log.v(TAG, "requestPermission:device=" + device);
+		Log.i(TAG, "requestPermission: device=" + (device != null ? device.getDeviceName() : "null") + ", isRegistered=" + isRegistered());
 		boolean result = false;
 		if (isRegistered()) {
 			if (device != null) {
 				if (mUsbManager.hasPermission(device)) {
 					// call onConnect if app already has permission
+					Log.i(TAG, "Permission already granted for device: " + device.getDeviceName());
 					processConnect(device);
 				} else {
 					try {
-						// パーミッションがなければ要求する
-						mUsbManager.requestPermission(device, mPermissionIntent);
+						// Request permission if not already granted
+						Log.i(TAG, "Requesting USB permission for device: " + device.getDeviceName());
+						if (mPermissionIntent == null) {
+							Log.e(TAG, "mPermissionIntent is null! Cannot request permission.");
+							processCancel(device);
+							result = true;
+						} else {
+							mUsbManager.requestPermission(device, mPermissionIntent);
+							Log.i(TAG, "Permission request sent successfully");
+						}
 					} catch (final Exception e) {
-						// Android5.1.xのGALAXY系でandroid.permission.sec.MDM_APP_MGMTという意味不明の例外生成するみたい
-						Log.w(TAG, e);
+						// Some Samsung devices throw android.permission.sec.MDM_APP_MGMT exception
+						Log.e(TAG, "Exception requesting permission: " + e.getMessage(), e);
 						processCancel(device);
 						result = true;
 					}
 				}
 			} else {
+				Log.w(TAG, "requestPermission: device is null");
 				processCancel(device);
 				result = true;
 			}
 		} else {
+			Log.e(TAG, "requestPermission: USBMonitor is not registered!");
 			processCancel(device);
 			result = true;
 		}

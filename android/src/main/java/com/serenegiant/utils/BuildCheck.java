@@ -15,6 +15,10 @@ public class BuildCheck {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
     
+    public static boolean isAPI23() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M; // Android 6.0+
+    }
+    
     public static boolean isAPI31() {
         return Build.VERSION.SDK_INT >= 31; // Build.VERSION_CODES.S
     }
